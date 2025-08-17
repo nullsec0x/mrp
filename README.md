@@ -27,9 +27,15 @@ status.
 
 ## Project Structure
 
-    ├── index.html        # Main application file
-    ├── icon.ico          # Favicon
-    └── README.md         # This file
+    ├── index.html        
+    ├── icon.ico          
+    ├── js/
+    ├── ui-service.js
+    ├── api-service.js
+    ├── main.js
+    ├── styles.css/
+    ├── main.css
+    └── README.md         
 
 ## Getting Started
 
