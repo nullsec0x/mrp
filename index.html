@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Rover Postcard</title>
+    <link rel="icon" href="icon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="icon.ico" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&display=swap');
+
+        :root {
+            --bg-color: #CCCCCC;
+            --primary-black: #474747;
+            --secondary-black: #333333;
+            --card-bg: #F0F0F0;
+            --image-bg: #333333;
+            --accent-color: #474747;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-black);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--card-bg);
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        #app:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        #postcard-container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            min-height: 500px;
+        }
+
+        #image-column {
+            flex: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            background-color: var(--image-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #image-column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(51,51,51,0.8) 0%, rgba(71,71,71,0.6) 100%);
+            z-index: 1;
+        }
+
+        #rover-image {
+            max-width: 100%;
+            max-height: 80vh;
+            height: auto;
+            border-radius: 0;
+            display: block;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transform: scale(0.95);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        #rover-image.loaded {
+            transform: scale(1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        #text-column {
+            flex: 2;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: var(--card-bg);
+        }
+
+        h1 {
+            color: var(--primary-black);
+            margin: 0 0 30px 0;
+            font-size: 2.2em;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background-color: var(--primary-black);
+        }
+
+        .info-group {
+            margin-bottom: 25px;
+            font-family: 'Fira Code', monospace;
+            font-weight: 300;
+        }
+
+        .info-label {
+            display: block;
+            font-size: 0.85em;
+            color: var(--secondary-black);
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .info-value {
+            font-size: 1.1em;
+            color: var(--primary-black);
+            font-weight: 400;
+        }
+
+        #additional-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(71, 71, 71, 0.1);
+        }
+
+        #generate-new-postcard {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+            font-family: 'Fira Code', monospace;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #generate-new-postcard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        #generate-new-postcard:hover {
+            background-color: var(--secondary-black);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #generate-new-postcard:hover::before {
+            left: 100%;
+        }
+
+        #loading-indicator {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px;
+            min-height: 500px;
+            position: relative;
+        }
+
+        .loading-text {
+            font-size: 1.2em;
+            color: var(--primary-black);
+            margin-top: 30px;
+            text-align: center;
+            font-family: 'Fira Code', monospace;
+            opacity: 0;
+            animation: fadeIn 1s ease 0.5s forwards;
+        }
+
+        .loading-subtext {
+            font-size: 0.9em;
+            color: var(--secondary-black);
+            margin-top: 10px;
+            font-family: 'Fira Code', monospace;
+            opacity: 0;
+            animation: fadeIn 1s ease 1s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .spinner-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-radius: 0;
+            mix-blend-mode: overlay;
+        }
+
+        .spinner-circle:nth-child(1) {
+            border-top-color: var(--primary-black);
+            animation: spin 1.5s linear infinite;
+        }
+
+        .spinner-circle:nth-child(2) {
+            border-left-color: var(--secondary-black);
+            animation: spin 2s linear infinite reverse;
+        }
+
+        .spinner-circle:nth-child(3) {
+            border-right-color: var(--primary-black);
+            animation: spin 2.5s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            #postcard-container {
+                flex-direction: column;
+            }
+
+            #image-column, #text-column {
+                flex: none;
+                width: 100%;
+            }
+
+            #image-column {
+                padding: 20px;
+                min-height: 300px;
+            }
+
+            #text-column {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-visible {
+            animation: cardFadeIn 0.8s ease forwards;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 0;
+            background-color: #4CAF50;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .footer {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            font-family: 'Fira Code', monospace;
+            color: var(--secondary-black);
+            padding: 10px 0;
+            margin-top: 20px;
+        }
+
+        .footer a {
+            color: var(--secondary-black);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--secondary-black);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="loading-indicator">
+            <div class="spinner">
+                <div class="spinner-circle"></div>
+                <div class="spinner-circle"></div>
+                <div class="spinner-circle"></div>
+            </div>
+            <div class="loading-text">Establishing connection with Mars</div>
+            <div class="loading-subtext">Retrieving latest rover images...</div>
+        </div>
+        <div id="postcard-container" style="display: none;">
+            <div id="image-column">
+                <img id="rover-image" src="" alt="Mars Rover Photo">
+            </div>
+            <div id="text-column">
+                <h1>Postcard from Mars</h1>
+
+                <div class="info-group">
+                    <span class="info-label">Earth Date</span>
+                    <span class="info-value" id="earth-date"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="info-label">Martian Sol</span>
+                    <span class="info-value" id="martian-sol"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="info-label">Camera</span>
+                    <span class="info-value" id="camera-name"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="info-label">Rover</span>
+                    <span class="info-value" id="rover-name"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="info-label">Rover Status</span>
+                    <span class="info-value"><span class="status-indicator"></span> <span id="rover-status">Active</span></span>
+                </div>
+
+                <div id="additional-info">
+                    <div class="info-group">
+                        <span class="info-label">Launch Date</span>
+                        <span class="info-value" id="launch-date"></span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">Landing Date</span>
+                        <span class="info-value" id="landing-date"></span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">Total Photos</span>
+                        <span class="info-value" id="total-photos"></span>
+                    </div>
+                </div>
+
+                <button id="generate-new-postcard">GENERATE NEW POSTCARD</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Made by <a href="https://github.com/nullsec0x" target="_blank">Nullsec0x</a>
+    </div>
+
+    <script>
+        const NASA_API_KEY = 'vwzvBKeEWOYFZLlln2NEwMPkbCOwA9SkDsCXG8ev';
+        const API_BASE_URL = 'https://api.nasa.gov/mars-photos/api/v1/rovers/perseverance/photos';
+        const ROVER_INFO_URL = 'https://api.nasa.gov/mars-photos/api/v1/manifests/perseverance?api_key=' + NASA_API_KEY;
+
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const postcardContainer = document.getElementById('postcard-container');
+        const roverImage = document.getElementById('rover-image');
+        const earthDate = document.getElementById('earth-date');
+        const martianSol = document.getElementById('martian-sol');
+        const cameraName = document.getElementById('camera-name');
+        const roverName = document.getElementById('rover-name');
+        const roverStatus = document.getElementById('rover-status');
+        const launchDate = document.getElementById('launch-date');
+        const landingDate = document.getElementById('landing-date');
+        const totalPhotos = document.getElementById('total-photos');
+        const generateButton = document.getElementById('generate-new-postcard');
+        const footer = document.querySelector('.footer');
+
+        let roverManifest = null;
+        let lastScrollPosition = 0;
+        let scrolledPast = false;
+
+        function handleScroll() {
+            const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (currentScrollPosition > lastScrollPosition && currentScrollPosition > 100) {
+                if (!scrolledPast) {
+                    footer.classList.add('show');
+                    scrolledPast = true;
+                }
+            } else if (currentScrollPosition === 0) {
+                footer.classList.remove('show');
+                scrolledPast = false;
+            }
+
+            lastScrollPosition = currentScrollPosition;
+        }
+
+        window.addEventListener('scroll', handleScroll);
+
+        async function fetchRoverManifest() {
+            try {
+                const response = await fetch(ROVER_INFO_URL);
+                const data = await response.json();
+                roverManifest = data.photo_manifest;
+                return roverManifest;
+            } catch (error) {
+                console.error('Error fetching rover manifest:', error);
+                return null;
+            }
+        }
+
+        async function fetchMarsRoverPhoto() {
+            loadingIndicator.style.display = 'flex';
+            postcardContainer.style.display = 'none';
+
+            if (!roverManifest) {
+                await fetchRoverManifest();
+            }
+
+            let sol = roverManifest ? roverManifest.max_sol : 1000;
+            let photos = [];
+            let attempts = 0;
+            const maxAttempts = 10;
+
+            while (photos.length === 0 && attempts < maxAttempts) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}?sol=${sol}&api_key=${NASA_API_KEY}`);
+                    const data = await response.json();
+                    photos = data.photos;
+                    if (photos.length === 0) {
+                        sol--;
+                        attempts++;
+                    }
+                } catch (error) {
+                    console.error('Error fetching Mars Rover photos:', error);
+                    loadingIndicator.innerHTML = `
+                        <div class="loading-text">Connection Error</div>
+                        <div class="loading-subtext">Failed to retrieve images. Please try again later.</div>
+                    `;
+                    return;
+                }
+            }
+
+            if (photos.length > 0) {
+                const randomIndex = Math.floor(Math.random() * photos.length);
+                const selectedPhoto = photos[randomIndex];
+
+                roverImage.classList.remove('loaded');
+                roverImage.onload = function() {
+                    this.classList.add('loaded');
+                };
+                roverImage.src = selectedPhoto.img_src;
+
+                earthDate.textContent = new Date(selectedPhoto.earth_date).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                });
+                martianSol.textContent = selectedPhoto.sol;
+                cameraName.textContent = selectedPhoto.camera.full_name;
+                roverName.textContent = selectedPhoto.rover.name;
+
+                if (roverManifest) {
+                    roverStatus.textContent = roverManifest.status.charAt(0).toUpperCase() + roverManifest.status.slice(1);
+                    launchDate.textContent = new Date(roverManifest.launch_date).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                    landingDate.textContent = new Date(roverManifest.landing_date).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                    totalPhotos.textContent = roverManifest.total_photos.toLocaleString();
+                }
+
+                loadingIndicator.style.display = 'none';
+                postcardContainer.style.display = 'flex';
+                postcardContainer.classList.add('card-visible');
+            } else {
+                loadingIndicator.innerHTML = `
+                    <div class="loading-text">No Images Available</div>
+                    <div class="loading-subtext">Couldn't find recent photos. Please try again later.</div>
+                `;
+            }
+        }
+
+        generateButton.addEventListener('click', fetchMarsRoverPhoto);
+
+        window.addEventListener('load', async () => {
+            await fetchRoverManifest();
+            fetchMarsRoverPhoto();
+        });
+    </script>
+</body>
+</html>
