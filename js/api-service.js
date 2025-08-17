@@ -1,5 +1,5 @@
 const API_SERVICE = (function() {
-const NASA_API_KEY = 'vwzvBKeEWOYFZLlln2NEwMPkbCOwA9SkDsCXG8ev';
+const NASA_API_KEY = 'DEMO_KEY';
 
     const roverCameras = {
         perseverance: ['EDL_RUCAM', 'EDL_RDCAM', 'FRONT_HAZCAM_LEFT', 'FRONT_HAZCAM_RIGHT', 'REAR_HAZCAM_LEFT', 'REAR_HAZCAM_RIGHT', 'MCZ_LEFT', 'MCZ_RIGHT', 'NAVCAM_LEFT', 'NAVCAM_RIGHT'],
